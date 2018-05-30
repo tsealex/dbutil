@@ -5,6 +5,9 @@ import (
 	"database/sql"
 	"github.com/lib/pq"
 	"time"
+	"github.com/tsealex/dbutil/dbtype"
+	"match-up/backend/util/jsonb"
+	"database/sql/driver"
 )
 
 /////////
@@ -117,57 +120,93 @@ func (v *Float64) UnmarshalJSON(data []byte) error {
 
 ///////// TODO: Geography
 //
-//type Int64 struct {
-//	sql.NullInt64
-//}
-//
-//func (v Int64) MarshalJSON() ([]byte, error) {
-//	if v.Valid {
-//		return json.Marshal(v.Int64)
-//	}
-//	return json.Marshal(nil)
-//}
-//
-//func (v *Int64) UnmarshalJSON(data []byte) error {
-//	var ptr *int64
-//	if err := json.Unmarshal(data, &ptr); err != nil {
-//		return err
-//	}
-//	if ptr != nil {
-//		v.Valid = true
-//		v.Int64 = *ptr
-//	} else {
-//		v.Valid = false
-//	}
-//	return nil
-//}
+type Point struct {
+	dbtype.Point
+	Valid bool
+}
+
+func (v *Point) Scan(value interface{}) error {
+	if value == nil {
+		v.Point, v.Valid = dbtype.Point{0, 0}, false
+		return nil
+	}
+	v.Valid = true
+	return v.Point.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (v Point) Value() (driver.Value, error) {
+	if !v.Valid {
+		return nil, nil
+	}
+	return v.Point.Value()
+}
+
+func (v Point) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Point)
+	}
+	return json.Marshal(nil)
+}
+
+func (v *Point) UnmarshalJSON(data []byte) error {
+	var ptr *dbtype.Point
+	if err := json.Unmarshal(data, &ptr); err != nil {
+		return err
+	}
+	if ptr != nil {
+		v.Valid = true
+		v.Point = *ptr
+	} else {
+		v.Valid = false
+	}
+	return nil
+}
 
 ///////// TODO: JSONB
 //
-//type String struct {
-//	sql.NullString
-//}
-//
-//func (v String) MarshalJSON() ([]byte, error) {
-//	if v.Valid {
-//		return json.Marshal(v.String)
-//	}
-//	return json.Marshal(nil)
-//}
-//
-//func (v *String) UnmarshalJSON(data []byte) error {
-//	var str *string
-//	if err := json.Unmarshal(data, &str); err != nil {
-//		return err
-//	}
-//	if str != nil {
-//		v.Valid = true
-//		v.String = *str
-//	} else {
-//		v.Valid = false
-//	}
-//	return nil
-//}
+type Jsonb struct {
+	jsonb.Jsonb
+	Valid bool
+}
+
+func (v *Jsonb) Scan(value interface{}) error {
+	if value == nil {
+		v.Jsonb, v.Valid = nil, false
+		return nil
+	}
+	v.Valid = true
+	return v.Jsonb.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (v Jsonb) Value() (driver.Value, error) {
+	if !v.Valid {
+		return nil, nil
+	}
+	return v.Jsonb.Value()
+}
+
+func (v Jsonb) MarshalJSON() ([]byte, error) {
+	if v.Valid {
+		return json.Marshal(v.Jsonb)
+	}
+	return json.Marshal(nil)
+}
+
+func (v *Jsonb) UnmarshalJSON(data []byte) error {
+	var ptr *Jsonb
+	if err := json.Unmarshal(data, &ptr); err != nil {
+		return err
+	}
+	if ptr != nil {
+		v.Valid = true
+		v.Jsonb = *ptr
+	} else {
+		v.Valid = false
+	}
+	return nil
+}
 
 /////////
 //
