@@ -6,9 +6,7 @@ package dynamic
 
 import (
 	"reflect"
-	"strings"
 	"fmt"
-	"bytes"
 )
 
 type abstractObject interface {
@@ -27,12 +25,9 @@ func NewObject(fields ... abstractField) *Object {
 	structFields := make([]reflect.StructField, len(fields))
 	for i, field := range fields {
 		name := field.Name()
-		tag := fmt.Sprintf(`json:"%s" db:"%s"`,
-			toSnakeCase(name), strings.ToLower(name))
 		structFields[i] = reflect.StructField{
 			Name:      name,
 			Type:      field.Type(),
-			Tag:       reflect.StructTag(tag),
 			Anonymous: false,
 		}
 	}
@@ -55,33 +50,42 @@ func (o *Object) CreateSlice() interface{} {
 	return reflect.New(o.structSliceRepr).Interface()
 }
 
-// Helpers:
-// Reference: https://gist.github.com/elwinar/14e1e897fdbe4d3432e1
-func toSnakeCase(in string) string {
-	length := len(in)
-
-	out := bytes.Buffer{}
-	for i := 0; i < length; i++ {
-		if i > 0 && isUpper(in[i]) && ((i+1 < length &&
-			isLower(in[i+1])) || isLower(in[i-1])) {
-			out.WriteByte('_')
-		}
-		out.WriteByte(toLower(in[i]))
+func GetField(ptr interface{}, name string) (interface{}, error) {
+	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {
+		return nil, fmt.Errorf("ptr is not a pointer")
+	} else if val = val.Elem(); val.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("ptr is not a pointer to a struct instance")
+	} else if val = val.FieldByName(name); !val.IsValid() {
+		return nil, fmt.Errorf("%s is not a field of the struct", name)
+	} else {
+		return val.Interface(), nil
 	}
-	return out.String()
 }
 
-func isLower(c uint8) bool {
-	return c >= 'a' && c <= 'z'
-}
 
-func isUpper(c uint8) bool {
-	return c >= 'A' && c <= 'Z'
-}
-
-func toLower(c uint8) uint8 {
-	if !isLower(c) {
-		return c + 32
+func GetElem(ptr interface{}, i int) (interface{}, error) {
+	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {
+		return nil, fmt.Errorf("ptr is not a pointer")
+	} else if val = val.Elem(); val.Kind() != reflect.Slice {
+		return nil, fmt.Errorf("ptr is not a slice")
+	} else if i >= val.Len() {
+		return nil, fmt.Errorf("i (%d) is out of range", i)
+	} else if val = val.Index(i); val.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("ptr is not a pointer to a struct slice")
+	} else if !val.CanAddr() {
+		return nil, fmt.Errorf("pointed struct instance is unaddressable")
+	} else {
+		return val.Addr().Interface(), nil
 	}
-	return c
+}
+
+
+func GetLen(ptr interface{}) (int, error) {
+	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {
+		return 0, fmt.Errorf("ptr is not a pointer")
+	} else if val = val.Elem(); val.Kind() != reflect.Slice {
+		return 0, fmt.Errorf("ptr is not a slice")
+	} else {
+		return val.Len(), nil
+	}
 }
