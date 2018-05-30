@@ -2,11 +2,10 @@ package dynamic
 
 import (
 	"testing"
-	"fmt"
 	"github.com/tsealex/dbutil"
 	"encoding/json"
-	"reflect"
-	"database/sql"
+	"github.com/stretchr/testify/assert"
+	"github.com/tsealex/dbutil/null"
 )
 
 func TestNewObject(t *testing.T) {
@@ -14,64 +13,57 @@ func TestNewObject(t *testing.T) {
 	intField2 := NewIntField("IntTwo", true, 32)
 	obj := NewObject(intField1, intField2)
 	ptr := obj.CreateInstance()
-	fmt.Println(ptr)
+	assert.NotNil(t, ptr)
 
-	fmt.Println(dbutil.Instance.Get(ptr,
+	assert.NoError(t, dbutil.Instance.Get(ptr,
 		"SELECT 1 AS IntOne, 2 AS IntTwo"))
-	fmt.Println(ptr)
+	assert.NotNil(t, ptr)
 
 	b, err := json.Marshal(ptr)
-	fmt.Println(err)
-	fmt.Println(string(b))
+	assert.NoError(t, err)
+	assert.Equal(t, `{"IntOne":1,"IntTwo":2}`, string(b))
 
-	fmt.Println(reflect.ValueOf(ptr).Elem().FieldByName("IntTwo").
-		Interface().(sql.NullInt64))
+	v, err := GetField(ptr, "IntOne")
+	assert.NoError(t, err)
+	assert.Equal(t, int64(1), v)
 
-	fmt.Println("------------------------")
-	fmt.Println(GetField(ptr, "IntOne"))
-	fmt.Println(GetField("hello", ""))
-	fmt.Println(GetField(obj.CreateSlice(), ""))
-	fmt.Println(GetField(ptr, "FieldNotExist"))
+	_, err = GetField("hello", "")
+	assert.Error(t, err)
+	_, err = GetField(obj.CreateSlice(), "")
+	assert.Error(t, err)
+	_, err = GetField(ptr, "FieldNotExist")
+	assert.Error(t, err)
 
-
-
-	//fmt.Println(ptr.(*struct{
-	//	IntOne int64
-	//	IntTwo int32
-	//}).IntOne)
+	s, ok := ptr.(*struct{
+		IntOne int64
+		IntTwo null.Int64
+	})
+	assert.True(t, ok)
+	assert.Equal(t, int64(2), s.IntTwo.Int64)
 
 	ptr = obj.CreateSlice()
-	fmt.Println(ptr)
-	fmt.Println(dbutil.Instance.Select(ptr,
+	assert.NotNil(t, ptr)
+	assert.NoError(t, dbutil.Instance.Select(ptr,
 		"SELECT 1 AS IntOne, 2 AS IntTwo"))
-	fmt.Println(ptr)
 
-	fmt.Println("------------------------")
-	fmt.Println(GetLen(ptr))
-	fmt.Println(GetElem(ptr, 1))
-	fmt.Println(GetElem("hello", 1))
-	fmt.Println(GetElem(obj.CreateInstance(), 1))
+	l, err := GetLen(ptr)
+	assert.NoError(t, err)
+	assert.Equal(t, l, 1)
+	_, err = GetElem(ptr, 1)
+	assert.Error(t, err)
+	_, err = GetElem("hello", 1)
+	assert.Error(t, err)
+	_, err = GetElem(obj.CreateInstance(), 1)
+	assert.Error(t, err)
 	elem, err := GetElem(ptr, 0)
-	fmt.Println(elem, err)
-	fmt.Println(GetField(elem, "IntOne"))
+	assert.NoError(t, err)
+
+	v, err = GetField(elem, "IntOne")
+	assert.NoError(t, err)
+	assert.Equal(t, int64(1), v)
 
 	b, err = json.Marshal(ptr)
-	fmt.Println(err)
-	fmt.Println(string(b))
+	assert.NoError(t, err)
+	assert.Equal(t, `[{"IntOne":1,"IntTwo":2}]`, string(b))
 
-	fmt.Println(">>>>>>>>>>>>>>>>>>>>")
-	s := reflect.New(obj.structRepr)
-	b, err = json.Marshal(s.Interface())
-	fmt.Println(err)
-	fmt.Println(string(b))
-
-
-
-	//var v = struct {
-	//	IntOne int64
-	//	IntTwo int32
-	//}{1, 2}
-	//b, err = json.Marshal(v)
-	//fmt.Println(err)
-	//fmt.Println(string(b))
 }

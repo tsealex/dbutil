@@ -1,4 +1,4 @@
-package nullable
+package null
 
 import (
 	"encoding/json"
@@ -195,7 +195,7 @@ func (v Jsonb) MarshalJSON() ([]byte, error) {
 }
 
 func (v *Jsonb) UnmarshalJSON(data []byte) error {
-	var ptr *Jsonb
+	var ptr *jsonb.Jsonb
 	if err := json.Unmarshal(data, &ptr); err != nil {
 		return err
 	}

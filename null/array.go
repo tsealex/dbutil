@@ -1,4 +1,4 @@
-package nullable
+package null
 
 import (
 	"github.com/lib/pq"

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/lib/pq"
 	"time"
+	"github.com/tsealex/dbutil/null"
 )
 
 type abstractField interface {
@@ -52,9 +53,9 @@ func NewIntField(name string, nullable bool, bits int) *IntField {
 	f.name = name
 	f.nullable = nullable
 	if f.nullable {
-		// TODO: set fieldType to be 64-bit nullable integer.
+		// TODO: set fieldType to be 64-bit null integer.
 		f.bits = 64
-		f.fieldType = reflect.TypeOf(sql.NullInt64{})
+		f.fieldType = reflect.TypeOf(null.Int64{})
 	} else {
 		// Set fieldType to be the corresponding primitive int type.
 		if bits <= 16 {
@@ -90,7 +91,7 @@ func NewFloatField(name string, nullable bool, bits int) *FloatField {
 	f.name = name
 	f.nullable = nullable
 	if f.nullable {
-		// TODO: set fieldType to be 64-bit nullable float.
+		// TODO: set fieldType to be 64-bit null float.
 		f.bits = 64
 		f.fieldType = reflect.TypeOf(sql.NullFloat64{})
 	} else {
@@ -120,7 +121,7 @@ func NewStringField(name string, nullable bool) *StringField {
 	f.name = name
 	f.nullable = nullable
 	if f.nullable {
-		// TODO: set fieldType to be nullable string.
+		// TODO: set fieldType to be null string.
 		f.fieldType = reflect.TypeOf(sql.NullFloat64{})
 	} else {
 		// Set fieldType to be the corresponding primitive int type.
@@ -143,7 +144,7 @@ func NewBoolField(name string, nullable bool) *BoolField {
 	f.name = name
 	f.nullable = nullable
 	if f.nullable {
-		// TODO: set fieldType to be nullable bool.
+		// TODO: set fieldType to be null bool.
 		f.fieldType = reflect.TypeOf(sql.NullBool{})
 	} else {
 		// Set fieldType to be the corresponding primitive int type.
@@ -166,7 +167,7 @@ func NewTimeField(name string, nullable bool) *TimeField {
 	f.name = name
 	f.nullable = nullable
 	if f.nullable {
-		// TODO: set fieldType to be nullable bool.
+		// TODO: set fieldType to be null bool.
 		f.fieldType = reflect.TypeOf(pq.NullTime{})
 	} else {
 		// Set fieldType to be the corresponding primitive int type.

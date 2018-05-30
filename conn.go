@@ -3,7 +3,7 @@ package dbutil
 
 import (
 	"database/sql"
-	_ "github.com/tsealex/pq"
+	_ "github.com/lib/pq"
 	"github.com/jmoiron/sqlx"
 )
 
