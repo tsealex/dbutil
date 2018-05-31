@@ -1,8 +1,8 @@
 package query
 
 type SQLContext struct {
-	TagMap     map[string]int
-	ReqSchName bool
+	TagMap    map[string]int
+	ReqSchema bool
 
 	index int
 }

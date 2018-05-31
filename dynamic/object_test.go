@@ -2,20 +2,28 @@ package dynamic
 
 import (
 	"testing"
-	"github.com/tsealex/dbutil"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"github.com/tsealex/dbutil/null"
+	"database/sql"
+	"github.com/jmoiron/sqlx"
 )
 
 func TestNewObject(t *testing.T) {
+	instance, err := sql.Open("postgres",
+		"dbname=postgres host=localhost port=6000 sslmode=disable")
+	if err != nil {
+		panic(err)
+	}
+	Instance := sqlx.NewDb(instance, "postgres")
+
 	intField1 := NewIntField("IntOne", false, 64)
 	intField2 := NewIntField("IntTwo", true, 32)
 	obj := NewObject(intField1, intField2)
 	ptr := obj.CreateInstance()
 	assert.NotNil(t, ptr)
 
-	assert.NoError(t, dbutil.Instance.Get(ptr,
+	assert.NoError(t, Instance.Get(ptr,
 		"SELECT 1 AS IntOne, 2 AS IntTwo"))
 	assert.NotNil(t, ptr)
 
@@ -43,7 +51,7 @@ func TestNewObject(t *testing.T) {
 
 	ptr = obj.CreateSlice()
 	assert.NotNil(t, ptr)
-	assert.NoError(t, dbutil.Instance.Select(ptr,
+	assert.NoError(t, Instance.Select(ptr,
 		"SELECT 1 AS IntOne, 2 AS IntTwo"))
 
 	l, err := GetLen(ptr)

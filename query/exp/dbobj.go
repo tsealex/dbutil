@@ -15,7 +15,7 @@ func Column(name string) *ColumnExp {
 	return &ColumnExp{Name: name}
 }
 
-func (c *ColumnExp) SetRel(r *RelationExp) *ColumnExp {
+func (c *ColumnExp) SetRelation(r *RelationExp) *ColumnExp {
 	c.Relation = r
 	return c
 }
@@ -57,7 +57,7 @@ func Relation(name string) *RelationExp {
 	return &RelationExp{Name: name}
 }
 
-func (r *RelationExp) SetSch(s *SchemaExp) *RelationExp {
+func (r *RelationExp) SetSchema(s *SchemaExp) *RelationExp {
 	r.Schema = s
 	return r
 }
@@ -76,7 +76,7 @@ func (r RelationExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error)
 	name := r.Name
 	// Consult the context to see whether schema name is required here. Note
 	// that, in some portion of a query, schema names are not required.
-	if ctx.ReqSchName && r.Schema != nil {
+	if ctx.ReqSchema && r.Schema != nil {
 		if err = r.Schema.toSQL(ctx, buf); err != nil {
 			return
 		}
