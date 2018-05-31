@@ -25,6 +25,7 @@ func TestLiteral(t *testing.T) {
 	l = LiteralExp{Value: "string"}
 	b = bytes.Buffer{}
 	l.toSQL(nil, &b)
-	assert.Equal(t, `"string"`, b.String())
+	assert.Equal(t, `'string'`, b.String())
+
 }
 

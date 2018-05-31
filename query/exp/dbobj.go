@@ -6,13 +6,16 @@ import (
 )
 
 type ColumnExp struct {
+	BaseExp
 	Name     string
 	Relation *RelationExp
 	Quoted   bool
 }
 
 func Column(name string) *ColumnExp {
-	return &ColumnExp{Name: name}
+	res := &ColumnExp{Name: name}
+	res.Exp = res
+	return res
 }
 
 func (c *ColumnExp) SetRelation(r *RelationExp) *ColumnExp {
@@ -48,13 +51,16 @@ func (c ColumnExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 }
 
 type RelationExp struct {
+	BaseExp
 	Name   string
 	Schema *SchemaExp
 	Quoted bool
 }
 
 func Relation(name string) *RelationExp {
-	return &RelationExp{Name: name}
+	res := &RelationExp{Name: name}
+	res.Exp = res
+	return res
 }
 
 func (r *RelationExp) SetSchema(s *SchemaExp) *RelationExp {
@@ -90,12 +96,15 @@ func (r RelationExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error)
 }
 
 type SchemaExp struct {
+	BaseExp
 	Name   string
 	Quoted bool
 }
 
 func Schema(name string) *SchemaExp {
-	return &SchemaExp{Name: name}
+	res := &SchemaExp{Name: name}
+	res.Exp = res
+	return res
 }
 
 func (s *SchemaExp) Quote() *SchemaExp {
