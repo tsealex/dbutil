@@ -10,9 +10,8 @@ import (
 )
 
 type abstractObject interface {
-	GetField(v reflect.Value, field string) interface{}
 	Type() reflect.Type
-	CreateInstance() interface{}
+	CreateInstance() ObjectPointer
 }
 
 type Object struct {
@@ -41,16 +40,16 @@ func (o *Object) Type() reflect.Type {
 }
 
 // Returns a pointer to an instance of this Object.
-func (o *Object) CreateInstance() interface{} {
+func (o *Object) CreateInstance() ObjectPointer {
 	return reflect.New(o.structRepr).Interface()
 }
 
 // Returns a pointer to slice of instances of this Object.
-func (o *Object) CreateSlice() interface{} {
+func (o *Object) CreateSlice() SlicePointer {
 	return reflect.New(o.structSliceRepr).Interface()
 }
 
-func GetField(ptr interface{}, name string) (interface{}, error) {
+func GetField(ptr ObjectPointer, name string) (interface{}, error) {
 	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {
 		return nil, fmt.Errorf("ptr is not a pointer")
 	} else if val = val.Elem(); val.Kind() != reflect.Struct {
@@ -63,7 +62,7 @@ func GetField(ptr interface{}, name string) (interface{}, error) {
 }
 
 
-func GetElem(ptr interface{}, i int) (interface{}, error) {
+func GetElem(ptr SlicePointer, i int) (ObjectPointer, error) {
 	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {
 		return nil, fmt.Errorf("ptr is not a pointer")
 	} else if val = val.Elem(); val.Kind() != reflect.Slice {
@@ -80,7 +79,7 @@ func GetElem(ptr interface{}, i int) (interface{}, error) {
 }
 
 
-func GetLen(ptr interface{}) (int, error) {
+func GetLen(ptr SlicePointer) (int, error) {
 	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {
 		return 0, fmt.Errorf("ptr is not a pointer")
 	} else if val = val.Elem(); val.Kind() != reflect.Slice {
@@ -89,3 +88,7 @@ func GetLen(ptr interface{}) (int, error) {
 		return val.Len(), nil
 	}
 }
+
+type SlicePointer interface{}
+
+type ObjectPointer interface{}

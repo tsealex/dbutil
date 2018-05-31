@@ -53,7 +53,7 @@ func NewIntField(name string, nullable bool, bits int) *IntField {
 	f.name = name
 	f.nullable = nullable
 	if f.nullable {
-		// TODO: set fieldType to be 64-bit null integer.
+		// Set fieldType to be 64-bit null integer.
 		f.bits = 64
 		f.fieldType = reflect.TypeOf(null.Int64{})
 	} else {
