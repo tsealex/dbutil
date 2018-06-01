@@ -8,7 +8,7 @@ import (
 )
 
 type Exp interface {
-	toSQL(*query.SQLContext, *bytes.Buffer) error
+	ToSQL(*query.SQLContext, *bytes.Buffer) error
 }
 
 type BaseExp struct {
@@ -139,30 +139,42 @@ func (b *BaseExp) SimilarTo(pattern *LiteralExp) *BinaryExp {
 	return Binary(b, " SIMILAR TO ", pattern)
 }
 
-func (b BaseExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (b BaseExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	return fmt.Errorf("unimplemented error")
 }
 
 type LiteralExp struct {
 	BaseExp
 	Value interface{}
+	isExp bool
 }
 
 func Literal(value interface{}) (res *LiteralExp) {
 	// TODO: type check, return nil if not a primitive type
 	res = &LiteralExp{Value: value}
+	res.isExp = false
 	res.Exp = res
 	return res
 }
 
-func (l LiteralExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
-	if str, ok := l.Value.(string); ok {
+func Expression(value string) (res *LiteralExp) {
+	// TODO: type check, return nil if not a primitive type
+	res = &LiteralExp{Value: value}
+	res.isExp = true
+	res.Exp = res
+	return res
+}
+
+func (l LiteralExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+	if str, ok := l.Value.(string); !l.isExp && ok {
 		_, err = buf.WriteString(fmt.Sprintf(`'%s'`, str))
 	} else {
 		_, err = buf.WriteString(fmt.Sprint(l.Value))
 	}
 	return
 }
+
+var All = Expression("*")
 
 type ArrayExp struct {
 	LiteralExp
@@ -176,7 +188,7 @@ func Array(values ... interface{}) *ArrayExp {
 	return res
 }
 
-func (a ArrayExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (a ArrayExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	buf.WriteString("ARRAY")
 	buf.WriteByte('[')
 	for i, val := range a.Values {
@@ -184,7 +196,7 @@ func (a ArrayExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 			buf.WriteByte(',')
 		}
 		if exp, ok := val.(Exp); ok {
-			if err = exp.toSQL(ctx, buf); err != nil {
+			if err = exp.ToSQL(ctx, buf); err != nil {
 				return
 			}
 		} else {
@@ -214,7 +226,7 @@ func TaggedUnbind(tag string) (res *UnbindExp) {
 	return res
 }
 
-func (u UnbindExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (u UnbindExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	// TODO: Handle other DBMS cases. This only supports Postgres right now.
 	var i int
 	if u.Tag != "" {
@@ -238,9 +250,9 @@ func Group(exp Exp) *GroupExp {
 	return res
 }
 
-func (g GroupExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (g GroupExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	buf.WriteByte('(')
-	if err = g.SubExp.toSQL(ctx, buf); err != nil {
+	if err = g.SubExp.ToSQL(ctx, buf); err != nil {
 		return
 	}
 	buf.WriteByte(')')
@@ -260,13 +272,13 @@ func Binary(left Exp, op string, right Exp) *BinaryExp {
 	return res
 }
 
-func (b BinaryExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (b BinaryExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	buf.WriteByte('(')
-	if err = b.LeftExp.toSQL(ctx, buf); err != nil {
+	if err = b.LeftExp.ToSQL(ctx, buf); err != nil {
 		return
 	}
 	buf.WriteString(b.Op)
-	if err = b.RightExp.toSQL(ctx, buf); err != nil {
+	if err = b.RightExp.ToSQL(ctx, buf); err != nil {
 		return
 	}
 	buf.WriteByte(')')
@@ -300,11 +312,11 @@ func Not(exp Exp) *UnaryExp {
 	return LeftUnary(" NOT ", exp)
 }
 
-func (u UnaryExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (u UnaryExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	if u.pre {
 		buf.WriteString(u.Op)
 	}
-	if err = u.SubExp.toSQL(ctx, buf); err != nil {
+	if err = u.SubExp.ToSQL(ctx, buf); err != nil {
 		return
 	}
 	if !u.pre {
@@ -325,6 +337,13 @@ func Cond(op string, exps ... Exp) *CondExp {
 	return res
 }
 
+func (c *CondExp) And(exps ... Exp) *CondExp {
+	var tmp = make([]Exp, len(exps) + 1)
+	tmp = append(tmp, c)
+	tmp = append(tmp, exps...)
+	return And(tmp...)
+}
+
 func And(exps ... Exp) *CondExp {
 	return Cond(" AND ", exps...)
 }
@@ -333,16 +352,18 @@ func Or(exps ... Exp) *CondExp {
 	return Cond(" OR ", exps...)
 }
 
-func (c CondExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (c CondExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	buf.WriteByte('(')
 	for i, exp := range c.Exps {
 		if i > 0 {
 			buf.WriteString(c.Op)
 		}
-		if err = exp.toSQL(ctx, buf); err != nil {
+		if err = exp.ToSQL(ctx, buf); err != nil {
 			return
 		}
 	}
 	buf.WriteByte(')')
 	return
 }
+
+// TODO: Add Subquery Expression

@@ -18,14 +18,14 @@ func Func(name string, exps ... Exp) *FuncExp {
 	return res
 }
 
-func (f FuncExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (f FuncExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	buf.WriteString(f.Name)
 	buf.WriteByte('(')
 	for i, arg := range f.Args {
 		if i > 0 {
 			buf.WriteByte(',')
 		}
-		if err = arg.toSQL(ctx, buf); err != nil {
+		if err = arg.ToSQL(ctx, buf); err != nil {
 			return
 		}
 	}
@@ -46,9 +46,9 @@ func Cast(typeName string, exp Exp) *CastExp {
 	return res
 }
 
-func (c CastExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (c CastExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	buf.WriteByte('(')
-	if err = c.SubExp.toSQL(ctx, buf); err != nil {
+	if err = c.SubExp.ToSQL(ctx, buf); err != nil {
 		return
 	}
 	buf.WriteString(")::")
@@ -69,9 +69,9 @@ func As(name string, exp Exp) *AliasExp {
 	return res
 }
 
-func (a AliasExp) toSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
+func (a AliasExp) ToSQL(ctx *query.SQLContext, buf *bytes.Buffer) (err error) {
 	buf.WriteByte('(')
-	if err = a.SubExp.toSQL(ctx, buf); err != nil {
+	if err = a.SubExp.ToSQL(ctx, buf); err != nil {
 		return
 	}
 	buf.WriteString(") AS ")

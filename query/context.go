@@ -3,6 +3,8 @@ package query
 type SQLContext struct {
 	TagMap    map[string]int
 	ReqSchema bool
+	// For insertion
+	WriteStatus uint8
 
 	index int
 }
@@ -27,3 +29,9 @@ func (ctx *SQLContext) GetTagIndex(tag string) int {
 		return i
 	}
 }
+
+const (
+	Regular    uint8 = iota
+	ValueOnly  uint8 = iota
+	ColumnOnly uint8 = iota
+)
