@@ -12,16 +12,20 @@ import (
 type abstractObject interface {
 	Type() reflect.Type
 	CreateInstance() ObjectPointer
+	CreateSlice() SlicePointer
 }
 
 type Object struct {
-	structRepr      reflect.Type
-	structSliceRepr reflect.Type
+	structRepr        reflect.Type
+	structSliceRepr   reflect.Type
+	editableRepr      reflect.Type
+	editableSliceRepr reflect.Type
 }
 
 func NewObject(fields ... abstractField) *Object {
 	obj := Object{}
 	structFields := make([]reflect.StructField, len(fields))
+	editableFields := make([]reflect.StructField, 0, len(fields))
 	for i, field := range fields {
 		name := field.Name()
 		structFields[i] = reflect.StructField{
@@ -29,9 +33,18 @@ func NewObject(fields ... abstractField) *Object {
 			Type:      field.Type(),
 			Anonymous: false,
 		}
+		if field.Editable() {
+			editableFields = append(editableFields, reflect.StructField{
+				Name:      name,
+				Type:      reflect.PtrTo(field.Type()),
+				Anonymous: false,
+			})
+		}
 	}
 	obj.structRepr = reflect.StructOf(structFields)
 	obj.structSliceRepr = reflect.SliceOf(obj.structRepr)
+	obj.editableRepr = reflect.StructOf(editableFields)
+	obj.editableSliceRepr = reflect.SliceOf(obj.editableRepr)
 	return &obj
 }
 
@@ -47,6 +60,14 @@ func (o *Object) CreateInstance() ObjectPointer {
 // Returns a pointer to slice of instances of this Object.
 func (o *Object) CreateSlice() SlicePointer {
 	return reflect.New(o.structSliceRepr).Interface()
+}
+
+func (o *Object) CreateEditable() ObjectPointer {
+	return reflect.New(o.editableRepr).Interface()
+}
+
+func (o *Object) CreateEditableSlice() ObjectPointer {
+	return reflect.New(o.editableSliceRepr).Interface()
 }
 
 func GetField(ptr ObjectPointer, name string) (interface{}, error) {

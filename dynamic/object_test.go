@@ -17,9 +17,12 @@ func TestNewObject(t *testing.T) {
 	}
 	Instance := sqlx.NewDb(instance, "postgres")
 
-	intField1 := NewIntField("IntOne", false, 64)
-	intField2 := NewIntField("IntTwo", true, 32)
+	intField1 := NewIntField("IntOne", false, false, 64)
+	intField2 := NewIntField("IntTwo", true, false, 32)
 	obj := NewObject(intField1, intField2)
+	assert.NotNil(t, obj.CreateEditable())
+	assert.NotNil(t, obj.CreateEditableSlice())
+
 	ptr := obj.CreateInstance()
 	assert.NotNil(t, ptr)
 

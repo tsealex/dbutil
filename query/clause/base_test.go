@@ -2,13 +2,13 @@ package clause
 
 import (
 	"testing"
-	"fmt"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSQLRecipe_Insert(t *testing.T) {
 	q, err := SQL().Read("Hello", "World").Select("table")
-	fmt.Println(q)
-	fmt.Println(err)
+	assert.Equal(t, "SELECT Hello,World FROM table", q)
+	assert.NoError(t, err)
 
 
 }

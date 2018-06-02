@@ -12,6 +12,7 @@ import (
 type abstractField interface {
 	Name() string
 	Nullable() bool
+	Editable() bool
 	Type() reflect.Type
 }
 
@@ -19,6 +20,7 @@ type abstractField interface {
 type BaseField struct {
 	name      string
 	nullable  bool
+	editable  bool
 	fieldType reflect.Type
 }
 
@@ -28,6 +30,10 @@ func (f *BaseField) Name() string {
 
 func (f *BaseField) Nullable() bool {
 	return f.nullable
+}
+
+func (f *BaseField) Editable() bool {
+	return f.editable
 }
 
 func (f *BaseField) Type() reflect.Type {
@@ -40,7 +46,7 @@ type IntField struct {
 	bits uint8
 }
 
-func NewIntField(name string, nullable bool, bits int) *IntField {
+func NewIntField(name string, nullable bool, editable bool, bits int) *IntField {
 	if bits < 0 {
 		panic("bits must be greater than or equal to 0")
 	} else if bits > 64 {
@@ -53,6 +59,7 @@ func NewIntField(name string, nullable bool, bits int) *IntField {
 	f := IntField{}
 	f.name = name
 	f.nullable = nullable
+	f.editable = editable
 	if f.nullable {
 		// Set fieldType to be 64-bit null integer.
 		f.bits = 64
@@ -78,7 +85,7 @@ type FloatField struct {
 	bits uint8
 }
 
-func NewFloatField(name string, nullable bool, bits int) *FloatField {
+func NewFloatField(name string, nullable bool, editable bool, bits int) *FloatField {
 	if bits < 0 {
 		panic("bits must be greater than or equal to 0")
 	} else if bits > 64 {
@@ -91,6 +98,7 @@ func NewFloatField(name string, nullable bool, bits int) *FloatField {
 	f := FloatField{}
 	f.name = name
 	f.nullable = nullable
+	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be 64-bit null float.
 		f.bits = 64
@@ -112,7 +120,7 @@ type StringField struct {
 	BaseField
 }
 
-func NewStringField(name string, nullable bool) *StringField {
+func NewStringField(name string, nullable bool, editable bool) *StringField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
@@ -121,6 +129,7 @@ func NewStringField(name string, nullable bool) *StringField {
 	f := StringField{}
 	f.name = name
 	f.nullable = nullable
+	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be null string.
 		f.fieldType = reflect.TypeOf(sql.NullFloat64{})
@@ -135,7 +144,7 @@ type BoolField struct {
 	BaseField
 }
 
-func NewBoolField(name string, nullable bool) *BoolField {
+func NewBoolField(name string, nullable bool, editable bool) *BoolField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
@@ -144,6 +153,7 @@ func NewBoolField(name string, nullable bool) *BoolField {
 	f := BoolField{}
 	f.name = name
 	f.nullable = nullable
+	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be null bool.
 		f.fieldType = reflect.TypeOf(sql.NullBool{})
@@ -158,7 +168,7 @@ type TimeField struct {
 	BaseField
 }
 
-func NewTimeField(name string, nullable bool) *TimeField {
+func NewTimeField(name string, nullable bool, editable bool) *TimeField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
@@ -167,6 +177,7 @@ func NewTimeField(name string, nullable bool) *TimeField {
 	f := TimeField{}
 	f.name = name
 	f.nullable = nullable
+	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be null bool.
 		f.fieldType = reflect.TypeOf(pq.NullTime{})
@@ -181,7 +192,7 @@ type PointField struct {
 	BaseField
 }
 
-func NewPointField(name string, nullable bool) *PointField {
+func NewPointField(name string, nullable bool, editable bool) *PointField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
@@ -190,6 +201,7 @@ func NewPointField(name string, nullable bool) *PointField {
 	f := PointField{}
 	f.name = name
 	f.nullable = nullable
+	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be null bool.
 		f.fieldType = reflect.TypeOf(null.Point{})
@@ -204,7 +216,7 @@ type JsonbField struct {
 	BaseField
 }
 
-func NewJsonbField(name string, nullable bool) *JsonbField {
+func NewJsonbField(name string, nullable bool, editable bool) *JsonbField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
@@ -213,6 +225,7 @@ func NewJsonbField(name string, nullable bool) *JsonbField {
 	f := JsonbField{}
 	f.name = name
 	f.nullable = nullable
+	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be null bool.
 		f.fieldType = reflect.TypeOf(null.Jsonb{})
@@ -228,13 +241,14 @@ type StringArrayField struct {
 	BaseField
 }
 
-func NewStringArrayField(name string) *StringArrayField {
+func NewStringArrayField(name string, editable bool) *StringArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
 	f := StringArrayField{}
 	f.name = name
 	f.nullable = true
+	f.editable = editable
 	f.fieldType = reflect.TypeOf(null.StringArray{})
 	return &f
 }
@@ -243,13 +257,14 @@ type IntArrayField struct {
 	BaseField
 }
 
-func NewIntArrayField(name string) *IntArrayField {
+func NewIntArrayField(name string, editable bool) *IntArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
 	f := IntArrayField{}
 	f.name = name
 	f.nullable = true
+	f.editable = editable
 	f.fieldType = reflect.TypeOf(null.Int64Array{})
 	return &f
 }
@@ -258,13 +273,14 @@ type FloatArrayField struct {
 	BaseField
 }
 
-func NewFloatArrayField(name string) *FloatArrayField {
+func NewFloatArrayField(name string, editable bool) *FloatArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
 	f := FloatArrayField{}
 	f.name = name
 	f.nullable = true
+	f.editable = editable
 	f.fieldType = reflect.TypeOf(null.Float64Array{})
 	return &f
 }
@@ -273,13 +289,14 @@ type BoolArrayField struct {
 	BaseField
 }
 
-func NewBoolArrayField(name string) *BoolArrayField {
+func NewBoolArrayField(name string, editable bool) *BoolArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
 	f := BoolArrayField{}
 	f.name = name
 	f.nullable = true
+	f.editable = editable
 	f.fieldType = reflect.TypeOf(null.BoolArray{})
 	return &f
 }
