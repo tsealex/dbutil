@@ -55,9 +55,9 @@ func TestNewObject(t *testing.T) {
 		IntTwo *null.Int64 `json:",omitempty"`
 	}{}
 
-	j := []byte(`{"IntOne":3, "IntTwo":4}`)
-	fmt.Println(json.Unmarshal(j, &pk))
-	fmt.Println(pk, pk.IntTwo)
+	//j := []byte(`{"IntOne":3, "IntTwo":4}`)
+	//fmt.Println(json.Unmarshal(j, &pk))
+	//fmt.Println(pk, pk.IntTwo)
 
 	var c int64
 	fmt.Println(Instance.QueryRow("SELECT $1", pk.IntTwo).Scan(&c))
