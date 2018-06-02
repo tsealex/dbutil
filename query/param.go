@@ -8,14 +8,14 @@ import (
 // maps or structs), extract the arguments named in the list, place them in the
 // an interface list and return a pointer of it. Nil will be returned if nowhere
 // can a named argument be found.
-// - nameList can contain empty strings "" to indicate that its value should
-// 	 come from a positional argument. The first argument will be mapped to the
-//   first empty string, and so on. The last arguments should be pointers to
-//   struct instances or maps. Their order don't matter, but if more then one
+// - nameList can contain empty string element "" to indicate that its value
+// 	 should come from a positional argument. The first argument will be mapped
+// 	 to the first empty string, and so on. The last arguments should be pointers
+//   to struct instances or maps. Their order don't matter, but if more then one
 //   struct field / map entry have the same name / key, the first one's value
-//   will be used. Any arguments that are not struct / map / pointer to them
-//   will be ignored once all the spots corresponding to the empty strings in
-//   nameList are filled.
+//   will be used. Any arguments that are not struct / map / pointer to a struct
+//   or map will be ignored once all the spots corresponding to the empty string
+//   elements in nameList are filled.
 //
 // For example:
 // ```
@@ -23,7 +23,7 @@ import (
 // var l = &struct{Hello int, World int}{3, 4}
 // PrepareParameters([]string{"Hello", "", "World"}, "str", &k, &l)
 // ```
-// The call will return the list `[]interface{}{1, "str", 2}`
+// The call will return the list `[]interface{}{1, "str", 2}`.
 func PrepareParameters(nameList *[]string, args ... interface{}) *[]interface{} {
 	l := len(*nameList)
 	var res = make([]interface{}, l)
@@ -81,6 +81,7 @@ func PrepareParameters(nameList *[]string, args ... interface{}) *[]interface{} 
 		}
 	}
 	if filled > 0 {
+		//panic("unable to locate all the parameters")
 		return nil
 	}
 	return &res

@@ -2,6 +2,10 @@
 // SQL queries may be generated dynamically. This is what this package aims to
 // achieve, to allow developers to create a struct dynamically, thus to be able
 // to use instances of that struct to collect query results.
+
+// Performance implication:
+// https://stackoverflow.com/questions/42010112/implications-of-defining-a-struct-inside-a-function-vs-outside
+// http://grokbase.com/t/gg/golang-nuts/14b1jfr6m0/go-nuts-how-does-gos-gc-handle-pointers-to-embedded-structs
 package dynamic
 
 import (
@@ -16,10 +20,10 @@ type abstractObject interface {
 }
 
 type Object struct {
-	structRepr        reflect.Type
-	structSliceRepr   reflect.Type
-	editableRepr      reflect.Type
-	editableSliceRepr reflect.Type
+	Model         reflect.Type
+	ModelSlice    reflect.Type
+	Editable      reflect.Type
+	EditableSlice reflect.Type
 }
 
 func NewObject(fields ... abstractField) *Object {
@@ -41,33 +45,33 @@ func NewObject(fields ... abstractField) *Object {
 			})
 		}
 	}
-	obj.structRepr = reflect.StructOf(structFields)
-	obj.structSliceRepr = reflect.SliceOf(obj.structRepr)
-	obj.editableRepr = reflect.StructOf(editableFields)
-	obj.editableSliceRepr = reflect.SliceOf(obj.editableRepr)
+	obj.Model = reflect.StructOf(structFields)
+	obj.ModelSlice = reflect.SliceOf(obj.Model)
+	obj.Editable = reflect.StructOf(editableFields)
+	obj.EditableSlice = reflect.SliceOf(obj.Editable)
 	return &obj
 }
 
 func (o *Object) Type() reflect.Type {
-	return o.structRepr
+	return o.Model
 }
 
 // Returns a pointer to an instance of this Object.
 func (o *Object) CreateInstance() ObjectPointer {
-	return reflect.New(o.structRepr).Interface()
+	return reflect.New(o.Model).Interface()
 }
 
 // Returns a pointer to slice of instances of this Object.
 func (o *Object) CreateSlice() SlicePointer {
-	return reflect.New(o.structSliceRepr).Interface()
+	return reflect.New(o.ModelSlice).Interface()
 }
 
 func (o *Object) CreateEditable() ObjectPointer {
-	return reflect.New(o.editableRepr).Interface()
+	return reflect.New(o.Editable).Interface()
 }
 
 func (o *Object) CreateEditableSlice() ObjectPointer {
-	return reflect.New(o.editableSliceRepr).Interface()
+	return reflect.New(o.EditableSlice).Interface()
 }
 
 func GetField(ptr ObjectPointer, name string) (interface{}, error) {

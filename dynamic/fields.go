@@ -2,7 +2,6 @@ package dynamic
 
 import (
 	"reflect"
-	"database/sql"
 	"github.com/lib/pq"
 	"time"
 	"github.com/tsealex/dbutil/null"
@@ -102,7 +101,7 @@ func NewFloatField(name string, nullable bool, editable bool, bits int) *FloatFi
 	if f.nullable {
 		// TODO: set fieldType to be 64-bit null float.
 		f.bits = 64
-		f.fieldType = reflect.TypeOf(sql.NullFloat64{})
+		f.fieldType = reflect.TypeOf(null.Float64{})
 	} else {
 		// Set fieldType to be the corresponding primitive int type.
 		if bits <= 32 {
@@ -132,7 +131,7 @@ func NewStringField(name string, nullable bool, editable bool) *StringField {
 	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be null string.
-		f.fieldType = reflect.TypeOf(sql.NullFloat64{})
+		f.fieldType = reflect.TypeOf(null.Float64{})
 	} else {
 		// Set fieldType to be the corresponding primitive int type.
 		f.fieldType = reflect.TypeOf(string(""))
@@ -156,7 +155,7 @@ func NewBoolField(name string, nullable bool, editable bool) *BoolField {
 	f.editable = editable
 	if f.nullable {
 		// TODO: set fieldType to be null bool.
-		f.fieldType = reflect.TypeOf(sql.NullBool{})
+		f.fieldType = reflect.TypeOf(null.Bool{})
 	} else {
 		// Set fieldType to be the corresponding primitive int type.
 		f.fieldType = reflect.TypeOf(false)

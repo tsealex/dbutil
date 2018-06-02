@@ -17,8 +17,8 @@ func TestNewObject(t *testing.T) {
 	}
 	Instance := sqlx.NewDb(instance, "postgres")
 
-	intField1 := NewIntField("IntOne", false, false, 64)
-	intField2 := NewIntField("IntTwo", true, false, 32)
+	intField1 := NewIntField("IntOne", false, true, 64)
+	intField2 := NewIntField("IntTwo", true, true, 32)
 	obj := NewObject(intField1, intField2)
 	assert.NotNil(t, obj.CreateEditable())
 	assert.NotNil(t, obj.CreateEditableSlice())
@@ -76,5 +76,18 @@ func TestNewObject(t *testing.T) {
 	b, err = json.Marshal(ptr)
 	assert.NoError(t, err)
 	assert.Equal(t, `[{"IntOne":1,"IntTwo":2}]`, string(b))
+
+	e := obj.CreateEditable()
+	assert.NoError(t, json.Unmarshal([]byte(`{"IntTwo":2}`), e))
+	f, err := GetField(e, "IntTwo")
+	assert.NoError(t, err)
+	i := f.(*null.Int64)
+	assert.NotNil(t, i)
+	assert.True(t, i.Valid)
+	assert.Equal(t, int64(2), i.Int64)
+
+	f, err = GetField(e, "IntOne")
+	assert.NoError(t, err)
+	assert.Nil(t, f)
 
 }
