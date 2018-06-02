@@ -54,6 +54,9 @@ func (v *Int64Array) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v *Int64Array) IsValid() bool {
+	return v.Valid
+}
 
 /////////
 // 
@@ -103,6 +106,9 @@ func (v *Float64Array) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v *Float64Array) IsValid() bool {
+	return v.Valid
+}
 
 /////////
 // 
@@ -152,6 +158,9 @@ func (v *BoolArray) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v *BoolArray) IsValid() bool {
+	return v.Valid
+}
 
 /////////
 // 
@@ -199,4 +208,8 @@ func (v *StringArray) UnmarshalJSON(data []byte) error {
 		v.Valid = false
 	}
 	return nil
+}
+
+func (v *StringArray) IsValid() bool {
+	return v.Valid
 }

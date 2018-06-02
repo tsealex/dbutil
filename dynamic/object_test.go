@@ -7,7 +7,6 @@ import (
 	"github.com/tsealex/dbutil/null"
 	"database/sql"
 	"github.com/jmoiron/sqlx"
-	"fmt"
 )
 
 func TestNewObject(t *testing.T) {
@@ -49,19 +48,6 @@ func TestNewObject(t *testing.T) {
 	})
 	assert.True(t, ok)
 	assert.Equal(t, int64(2), s.IntTwo.Int64)
-
-	pk := struct {
-		IntOne *int64 `json:",omitempty"`
-		IntTwo *null.Int64 `json:",omitempty"`
-	}{}
-
-	//j := []byte(`{"IntOne":3, "IntTwo":4}`)
-	//fmt.Println(json.Unmarshal(j, &pk))
-	//fmt.Println(pk, pk.IntTwo)
-
-	var c int64
-	fmt.Println(Instance.QueryRow("SELECT $1", pk.IntTwo).Scan(&c))
-	fmt.Println(c)
 
 	ptr = obj.CreateSlice()
 	assert.NotNil(t, ptr)

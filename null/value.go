@@ -10,6 +10,10 @@ import (
 	"database/sql/driver"
 )
 
+type Nullable interface {
+	IsValid() bool
+}
+
 /////////
 //
 type String struct {
@@ -35,6 +39,10 @@ func (v *String) UnmarshalJSON(data []byte) error {
 		v.Valid = false
 	}
 	return nil
+}
+
+func (v *String) IsValid() bool {
+	return v.Valid
 }
 
 /////////
@@ -64,6 +72,10 @@ func (v *Int64) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v *Int64) IsValid() bool {
+	return v.Valid
+}
+
 /////////
 //
 type Bool struct {
@@ -91,6 +103,10 @@ func (v *Bool) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v *Bool) IsValid() bool {
+	return v.Valid
+}
+
 /////////
 //
 type Float64 struct {
@@ -116,6 +132,10 @@ func (v *Float64) UnmarshalJSON(data []byte) error {
 		v.Valid = false
 	}
 	return nil
+}
+
+func (v *Float64) IsValid() bool {
+	return v.Valid
 }
 
 ///////// TODO: Geography
@@ -163,6 +183,10 @@ func (v *Point) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v *Point) IsValid() bool {
+	return v.Valid
+}
+
 ///////// TODO: JSONB
 //
 type Jsonb struct {
@@ -208,6 +232,10 @@ func (v *Jsonb) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (v *Jsonb) IsValid() bool {
+	return v.Valid
+}
+
 /////////
 //
 type Time struct {
@@ -233,4 +261,8 @@ func (v *Time) UnmarshalJSON(data []byte) error {
 		v.Valid = false
 	}
 	return nil
+}
+
+func (v *Time) IsValid() bool {
+	return v.Valid
 }
