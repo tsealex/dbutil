@@ -61,7 +61,6 @@ func GetField(ptr ObjectPointer, name string) (interface{}, error) {
 	}
 }
 
-
 func GetElem(ptr SlicePointer, i int) (ObjectPointer, error) {
 	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {
 		return nil, fmt.Errorf("ptr is not a pointer")
@@ -77,7 +76,6 @@ func GetElem(ptr SlicePointer, i int) (ObjectPointer, error) {
 		return val.Addr().Interface(), nil
 	}
 }
-
 
 func GetLen(ptr SlicePointer) (int, error) {
 	if val := reflect.ValueOf(ptr); val.Kind() != reflect.Ptr {

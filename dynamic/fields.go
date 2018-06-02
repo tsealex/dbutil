@@ -6,6 +6,7 @@ import (
 	"github.com/lib/pq"
 	"time"
 	"github.com/tsealex/dbutil/null"
+	"github.com/tsealex/dbutil/dbtype"
 )
 
 type abstractField interface {
@@ -176,5 +177,109 @@ func NewTimeField(name string, nullable bool) *TimeField {
 	return &f
 }
 
-// TODO: Array types.
+type PointField struct {
+	BaseField
+}
 
+func NewPointField(name string, nullable bool) *PointField {
+	if len(name) == 0 {
+		panic("name must not be empty")
+	}
+	// TODO: Use regex to check if name begins with a lowercase character or
+	// TODO: contains any illegal characters.
+	f := PointField{}
+	f.name = name
+	f.nullable = nullable
+	if f.nullable {
+		// TODO: set fieldType to be null bool.
+		f.fieldType = reflect.TypeOf(null.Point{})
+	} else {
+		// Set fieldType to be the corresponding primitive int type.
+		f.fieldType = reflect.TypeOf(dbtype.Point{})
+	}
+	return &f
+}
+
+type JsonbField struct {
+	BaseField
+}
+
+func NewJsonbField(name string, nullable bool) *JsonbField {
+	if len(name) == 0 {
+		panic("name must not be empty")
+	}
+	// TODO: Use regex to check if name begins with a lowercase character or
+	// TODO: contains any illegal characters.
+	f := JsonbField{}
+	f.name = name
+	f.nullable = nullable
+	if f.nullable {
+		// TODO: set fieldType to be null bool.
+		f.fieldType = reflect.TypeOf(null.Jsonb{})
+	} else {
+		// Set fieldType to be the corresponding primitive int type.
+		f.fieldType = reflect.TypeOf(dbtype.Jsonb{})
+	}
+	return &f
+}
+
+// Array types.
+type StringArrayField struct {
+	BaseField
+}
+
+func NewStringArrayField(name string) *StringArrayField {
+	if len(name) == 0 {
+		panic("name must not be empty")
+	}
+	f := StringArrayField{}
+	f.name = name
+	f.nullable = true
+	f.fieldType = reflect.TypeOf(null.StringArray{})
+	return &f
+}
+
+type IntArrayField struct {
+	BaseField
+}
+
+func NewIntArrayField(name string) *IntArrayField {
+	if len(name) == 0 {
+		panic("name must not be empty")
+	}
+	f := IntArrayField{}
+	f.name = name
+	f.nullable = true
+	f.fieldType = reflect.TypeOf(null.Int64Array{})
+	return &f
+}
+
+type FloatArrayField struct {
+	BaseField
+}
+
+func NewFloatArrayField(name string) *FloatArrayField {
+	if len(name) == 0 {
+		panic("name must not be empty")
+	}
+	f := FloatArrayField{}
+	f.name = name
+	f.nullable = true
+	f.fieldType = reflect.TypeOf(null.Float64Array{})
+	return &f
+}
+
+type BoolArrayField struct {
+	BaseField
+}
+
+func NewBoolArrayField(name string) *BoolArrayField {
+	if len(name) == 0 {
+		panic("name must not be empty")
+	}
+	f := BoolArrayField{}
+	f.name = name
+	f.nullable = true
+	f.fieldType = reflect.TypeOf(null.BoolArray{})
+	return &f
+}

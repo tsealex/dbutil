@@ -277,10 +277,9 @@ func (r *SQLRecipe) Insert(table exp.Exp) (q string, err error) {
 	if err = table.ToSQL(ctx, buf); err != nil {
 		return
 	}
-	buf.WriteByte('\n')
 	if len(r.write) > 0 {
 		ctx.WriteStatus = query.ColumnOnly
-		buf.WriteByte('(')
+		buf.WriteString("' (")
 		if err = concatExps(",", ctx, buf, r.write); err != nil {
 			return
 		}
