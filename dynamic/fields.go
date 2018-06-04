@@ -8,7 +8,7 @@ import (
 	"github.com/tsealex/dbutil/dbtype"
 )
 
-type abstractField interface {
+type AbstractField interface {
 	Name() string
 	Nullable() bool
 	Editable() bool
@@ -240,13 +240,13 @@ type StringArrayField struct {
 	BaseField
 }
 
-func NewStringArrayField(name string, editable bool) *StringArrayField {
+func NewStringArrayField(name string, nullable bool, editable bool) *StringArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
 	f := StringArrayField{}
 	f.name = name
-	f.nullable = true
+	f.nullable = nullable
 	f.editable = editable
 	f.fieldType = reflect.TypeOf(null.StringArray{})
 	return &f
@@ -256,13 +256,13 @@ type IntArrayField struct {
 	BaseField
 }
 
-func NewIntArrayField(name string, editable bool) *IntArrayField {
+func NewIntArrayField(name string, nullable bool, editable bool) *IntArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
 	f := IntArrayField{}
 	f.name = name
-	f.nullable = true
+	f.nullable = nullable
 	f.editable = editable
 	f.fieldType = reflect.TypeOf(null.Int64Array{})
 	return &f
@@ -272,7 +272,7 @@ type FloatArrayField struct {
 	BaseField
 }
 
-func NewFloatArrayField(name string, editable bool) *FloatArrayField {
+func NewFloatArrayField(name string, nullable bool, editable bool) *FloatArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
@@ -288,13 +288,13 @@ type BoolArrayField struct {
 	BaseField
 }
 
-func NewBoolArrayField(name string, editable bool) *BoolArrayField {
+func NewBoolArrayField(name string, nullable bool, editable bool) *BoolArrayField {
 	if len(name) == 0 {
 		panic("name must not be empty")
 	}
 	f := BoolArrayField{}
 	f.name = name
-	f.nullable = true
+	f.nullable = nullable
 	f.editable = editable
 	f.fieldType = reflect.TypeOf(null.BoolArray{})
 	return &f
