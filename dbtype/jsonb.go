@@ -35,3 +35,11 @@ func (j *Jsonb) Scan(src interface{}) error {
 
 	return nil
 }
+
+// Return defaultValue if key does not exist in the Jsonb object.the
+func (j *Jsonb) GetOrDefault(key string, defaultValue interface{}) interface{} {
+	if value, in := (*j)[key]; in {
+		return value
+	}
+	return defaultValue
+}
